@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+//import 'package:flutter/src/widgets/framework.dart';
+//import 'package:flutter/src/widgets/placeholder.dart';
 import 'Body1.dart';
 import 'Body2.dart';
 import 'Body3.dart';
@@ -42,11 +42,11 @@ class _HomescreenState extends State<Homescreen> {
             height: 300,
             child: page[currentIndex],
           ),
-          Center(
+          /* Center(
               child: Text(
             widget.email,
             style: TextStyle(fontSize: 30),
-          )),
+          )),*/
         ],
       ),
       //  body: page[currentIndex],

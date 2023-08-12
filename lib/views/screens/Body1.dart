@@ -18,6 +18,7 @@ class _Body1State extends State<Body1> {
   getCachedEmail() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     email = prefs.getString('email') ?? '--';
+
     setState(() {});
   }
 
@@ -30,7 +31,7 @@ class _Body1State extends State<Body1> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text("page1 /n $email"),
+      child: Text("Your Profile \n  WELCOME..." + " $email"),
     );
   }
 }
