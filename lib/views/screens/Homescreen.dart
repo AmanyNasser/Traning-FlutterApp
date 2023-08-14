@@ -39,7 +39,7 @@ class _HomescreenState extends State<Homescreen> {
       body: Column(
         children: [
           Container(
-            height: 300,
+            height: 600,
             child: page[currentIndex],
           ),
           /* Center(
