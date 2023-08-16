@@ -1,10 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_application_1/views/screens/Homescreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Loginscreen extends StatefulWidget {
-  const Loginscreen({super.key});
+  final VoidCallback onClickSignUp;
+
+  const Loginscreen({
+    Key? key,
+    required this.onClickSignUp,
+  }) : super(key: key);
 
   @override
   State<Loginscreen> createState() => LoginscreenState();
@@ -16,6 +23,7 @@ class LoginscreenState extends State<Loginscreen> {
 
   //navigator
   TextEditingController emailcontroller = TextEditingController();
+  TextEditingController passwordcontroller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +50,7 @@ class LoginscreenState extends State<Loginscreen> {
                     builder: (context, snapshot) {
                       return const SizedBox(height: 10);
                     }),
-                Padding(
+                /* Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
                       validator: (value) {
@@ -58,7 +66,7 @@ class LoginscreenState extends State<Loginscreen> {
                         icon: Icon(Icons.phone_android),
                         labelText: 'phone number',
                       )),
-                ),
+                ),*/
                 const SizedBox(height: 5),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -83,6 +91,7 @@ class LoginscreenState extends State<Loginscreen> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
+                      controller: passwordcontroller,
                       validator: (value) {
                         // 3-password validation
                         if (value == null ||
@@ -102,23 +111,28 @@ class LoginscreenState extends State<Loginscreen> {
                   onTap: () async {
                     //3-validation all number&password&email
                     if (_formKey.currentState!.validate()) {
-                      final SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
+                      bool result = await fireBaseLogin(
+                          emailcontroller.text, passwordcontroller.text);
+                      if (result == true) {
+                        final SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
 
-                      await prefs.setString('email', emailcontroller.text);
-                      //navigator poshing
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Homescreen(
-                                  email: emailcontroller.text,
-                                )),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("success"),
-                        ),
-                      );
+                        await prefs.setString('email', emailcontroller.text);
+                        //navigator poshing
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Homescreen(
+                                    email: emailcontroller.text,
+                                  )),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Login Faild"),
+                          ),
+                        );
+                      }
                     }
                   },
                   child: Padding(
@@ -161,14 +175,43 @@ class LoginscreenState extends State<Loginscreen> {
                   child: Text('Forgot password? No yawa.Tap me'),
                 ),
                 const SizedBox(height: 10),
-                const CupertinoButton.filled(
-                  onPressed: null,
-                  child: Text(
-                    'No Account? sign Up',
-                    style: TextStyle(color: Color.fromARGB(118, 0, 0, 0)),
+                RichText(
+                    text: TextSpan(
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
                   ),
-                ),
+                  text: ' Have No account?',
+                  children: [
+                    TextSpan(
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = widget.onClickSignUp,
+                      text: 'SignUp',
+                      style: TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Theme.of(context).colorScheme.secondary),
+                    ),
+                  ],
+                ))
               ],
             )));
+  }
+
+  Future<bool> fireBaseLogin(String email, String password) async {
+    try {
+      // FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password)
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      if (userCredential.user != null) {
+        return true;
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No User Found For That Email');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong Password Provided For That User ');
+      }
+    }
+    return false;
   }
 }
